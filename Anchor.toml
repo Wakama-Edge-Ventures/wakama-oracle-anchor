@@ -13,7 +13,7 @@ url = "/home/wakama/.config/solana/wakama-devnet.json"
 
 [provider]
 cluster = "Devnet"
-wallet = "~/.config/solana/wakama-mainnet-deploy-v2.json"
+wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run mocha -t 1000000 tests/"
