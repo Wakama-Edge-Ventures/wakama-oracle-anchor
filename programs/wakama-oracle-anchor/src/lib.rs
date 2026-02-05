@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("93eL55wjf62Pw8UPsKS8V7b9efk28UyG8C74Vif2gMNR"); 
+declare_id!("HgdtgGR8pw6T3eC4cwBFtRYcNoGzDN2ujkXkbw2oCnzj"); 
 
 /// Taille de l’account RWA (nous avons laissé un petit buffer pour évoluer)
 pub const RWA_ASSET_SIZE: usize = 8   // discriminator

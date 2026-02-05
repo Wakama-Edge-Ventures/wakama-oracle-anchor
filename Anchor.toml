@@ -6,14 +6,14 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-wakama_oracle_anchor = "93eL55wjf62Pw8UPsKS8V7b9efk28UyG8C74Vif2gMNR"
+wakama_oracle_anchor = "HgdtgGR8pw6T3eC4cwBFtRYcNoGzDN2ujkXkbw2oCnzj"
 
 [registry]
 url = "/home/wakama/.config/solana/wakama-devnet.json"
 
 [provider]
 cluster = "Devnet"
-wallet = "~/.config/solana/id.json"
+wallet = "~/.config/solana/wakama-mainnet-deploy-v2.json"
 
 [scripts]
 test = "yarn run mocha -t 1000000 tests/"
