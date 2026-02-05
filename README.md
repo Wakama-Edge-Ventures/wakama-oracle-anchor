@@ -3,12 +3,18 @@
 Devnet RWA demo program used for Wakama Oracle Milestone 1 with Solana Foundation.
 
 - Program name: `wakama-oracle-anchor`
-- Program ID (devnet): `93eL55wjf62Pw8UPsKS8V7b9efk28UyG8C74Vif2gMNR`
+- Program ID (devnet): `HgdtgGR8pw6T3eC4cwBFtRYcNoGzDN2ujkXkbw2oCnzj`
 - Cluster: `devnet`
 - Explorer:  
-  https://explorer.solana.com/address/93eL55wjf62Pw8UPsKS8V7b9efk28UyG8C74Vif2gMNR?cluster=devnet
+  https://explorer.solana.com/address/HgdtgGR8pw6T3eC4cwBFtRYcNoGzDN2ujkXkbw2oCnzj?cluster=devnet
 
-Upgrade authority (Phantom wallet):  
+- ProgramData (devnet): `5uQqv9gwqW45PaFe6XtqVMyfsncYjp5Zn43pSsdzwqk5`
+- Deploy signature (devnet): `TqvWQu72D93J6aDWeya4ktyjycK31VKXh82tfY2tXZ2S1RZuY648xEfdxZcPpLqeiGzJYZ4jYX392nRS3R8gkGN`
+
+Upgrade authority (current deploy keypair):  
+`A95qPfZPvhWW4wfSLUoS9EzezMXRbokYN7K7mbN1Mkd6j`
+
+Legacy upgrade authority (Phantom wallet, prior milestone reference):  
 `GYdgCBzz9Phzvdh8dTz9VRB8qyjVbA6GscYPKTrGBczR`
 
 ---
@@ -25,7 +31,7 @@ The program:
 - Tracks an "invested USDC volume" value for the asset (proxy for RWA investment volume).
 - Emits events for every important operation, so that a dashboard or Solscan-style explorer can display on-chain activity clearly.
 
-The program does not handle token transfers or custody directly. It is a clean on-chain state machine plus events, used as the RWA example backing Milestone 1 and the dashboard.
+Important: this current sample **does not** handle SPL token transfers or custody. It is an on-chain state machine + events (Milestone 1 / devnet demo).
 
 ---
 
@@ -117,8 +123,7 @@ pub struct RwaAsset {
     pub created_at: i64,
     pub updated_at: i64,
 }
-
-
+**//
 3.2 RwaStatus enum
 pub enum RwaStatus {
     Pending  = 0,
@@ -126,67 +131,69 @@ pub enum RwaStatus {
     Redeemed = 2,
     Defaulted = 3,
 }
-
 4. Build and deploy
 4.1 Prerequisites
 
 Rust and Cargo
 
-Solana CLI (Agave) 2.1.x, configured on devnet:
+Solana CLI (Agave) configured on devnet:
 
 solana config set --url https://api.devnet.solana.com
 
+Anchor CLI
 
-Anchor CLI 0.31.1
-
-Node.js and npm
+Node.js and a package manager
 
 4.2 Build
 
 From the repository root:
 
 anchor build
-
 4.3 Deploy to devnet
 
-Anchor.toml already contains the program ID:
+Anchor.toml contains the program ID:
 
 [programs.devnet]
-wakama-oracle-anchor = "93eL55wjf62Pw8UPsKS8V7b9efk28UyG8C74Vif2gMNR"
-
+wakama_oracle_anchor = "HgdtgGR8pw6T3eC4cwBFtRYcNoGzDN2ujkXkbw2oCnzj"
 
 Deploy:
 
 anchor deploy --provider.cluster devnet
-
 5. Quickstart: call initialize_asset and push_oracle_update
 
 Create tests/rwa-sample.js:
 
 const anchor = require("@coral-xyz/anchor");
 
+
 describe("wakama-oracle-anchor – RWA sample", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
+
   const program = anchor.workspace.WakamaOracleAnchor;
+
 
   it("initializes an asset and pushes an oracle update", async () => {
     // Mint used only as a stable seed; no SPL constraints here.
     const assetMint = anchor.web3.Keypair.generate().publicKey;
 
+
     // For this demo, oracle authority = wallet
     const oracleAuthority = provider.wallet.publicKey;
+
 
     const [assetPda] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("rwa-asset"), assetMint.toBuffer()],
       program.programId
     );
 
+
     console.log("Program ID:", program.programId.toBase58());
     console.log("Asset PDA:", assetPda.toBase58());
     console.log("Asset mint:", assetMint.toBase58());
     console.log("Oracle authority:", oracleAuthority.toBase58());
+
 
     // 1) initialize_asset
     await program.methods
@@ -199,9 +206,11 @@ describe("wakama-oracle-anchor – RWA sample", () => {
       })
       .rpc();
 
+
     // 2) push_oracle_update
     const pointsDelta = new anchor.BN(10_000);
     const batchCount = new anchor.BN(5);
+
 
     await program.methods
       .pushOracleUpdate(pointsDelta, batchCount)
@@ -211,7 +220,9 @@ describe("wakama-oracle-anchor – RWA sample", () => {
       })
       .rpc();
 
+
     const asset = await program.account.rwaAsset.fetch(assetPda);
+
 
     console.log("RWA asset state:", {
       authority: asset.authority.toBase58(),
@@ -228,11 +239,9 @@ describe("wakama-oracle-anchor – RWA sample", () => {
   });
 });
 
-
 Run the test:
 
 anchor test
-
 
 This will:
 
